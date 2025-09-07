@@ -1,3 +1,6 @@
 Flask
 pyodbc
 Flask-Cors
+itsdangerous
+reportlab
+ollama
