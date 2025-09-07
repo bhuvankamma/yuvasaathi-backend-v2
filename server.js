@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
+const path = require('path'); // Add this line
 
 const app = express();
 
@@ -22,12 +23,16 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Get the base directory of the project
+const basePath = process.cwd();
+
 // --- API ENDPOINTS ---
 
 // 1. Get all districts for the initial map view
 app.get('/api/bihar-map-data', (req, res) => {
     try {
-        const districtsData = JSON.parse(fs.readFileSync('data/bihar_districts.geojson', 'utf8'));
+        const filePath = path.join(basePath, 'data', 'bihar_districts.geojson');
+        const districtsData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         res.json(districtsData);
     } catch (error) {
         console.error("Error loading district map data:", error);
@@ -38,7 +43,8 @@ app.get('/api/bihar-map-data', (req, res) => {
 // 2. Get blocks for a specific district
 app.get('/api/district-data/:district_name', (req, res) => {
     try {
-        const blocksData = JSON.parse(fs.readFileSync('data/bihar_blocks.geojson', 'utf8'));
+        const filePath = path.join(basePath, 'data', 'bihar_blocks.geojson');
+        const blocksData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         const districtName = req.params.district_name.toLowerCase();
 
         const districtBlocks = {
@@ -64,7 +70,8 @@ app.get('/api/district-data/:district_name', (req, res) => {
 // 3. Get villages for a specific mandal/block
 app.get('/api/mandal-data/:mandal_name', (req, res) => {
     try {
-        const villagesData = JSON.parse(fs.readFileSync('data/bihar_villages.geojson', 'utf8'));
+        const filePath = path.join(basePath, 'data', 'bihar_villages.geojson');
+        const villagesData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
         const mandalName = req.params.mandal_name.toLowerCase();
 
         const mandalVillages = {
