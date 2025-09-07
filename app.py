@@ -21,45 +21,74 @@ from map_api import map_bp
 # Import the function from your separate OTP service file
 from otp_service import generate_otp, send_otp_email
 
+# Flask App setup
+app = Flask(__name__)
+CORS(app)
+
+# Configure the upload folder for resumes
+UPLOAD_FOLDER = "uploads"
+GENERATED_FOLDER = "generated_resumes"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(GENERATED_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['GENERATED_FOLDER'] = GENERATED_FOLDER
+
+# Register the map_api blueprint to make its routes available
+app.register_blueprint(map_bp)
+
+
 # ---------- NEW EMAIL CONFIGURATION & TOKENIZER ----------
-SENDER_EMAIL = "chandinisahasra02@gmail.com"
-SENDER_PASSWORD = "eoxxyqhscrsqhsyk"
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "your_default_email@gmail.com")
+SENDER_PASSWORD = os.environ.get("SENDER_PASSWORD", "your_default_password")
 # The secret key for signing the verification token
-VERIFICATION_SECRET_KEY = "your-very-secret-key"
+# IMPORTANT: Use an environment variable for security in production!
+VERIFICATION_SECRET_KEY = os.environ.get("VERIFICATION_SECRET_KEY", "a-strong-and-secret-key-that-is-not-the-default")
 # Token serializer
 s = URLSafeTimedSerializer(VERIFICATION_SECRET_KEY)
-
+# URL for your live application. MUST BE SET AS AN ENVIRONMENT VARIABLE ON VERCEL.
+APP_URL = os.environ.get("APP_URL")
 
 # Helper to hash passwords
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
 def get_connection():
-    return pyodbc.connect(
-        'DRIVER={SQL Server};'
-        'SERVER=DESKTOP-JQUK7UE;'
-        'DATABASE=UserDB1;'
-        'Trusted_Connection=yes;'
-    )
+    # IMPORTANT: Use an environment variable for the database connection string.
+    # The hardcoded server name will not work on Vercel.
+    connection_string = os.environ.get("DATABASE_URL")
+    if not connection_string:
+        # Fallback to local connection string for development
+        print("Warning: Using local database connection. This will fail on Vercel.")
+        return pyodbc.connect(
+            'DRIVER={SQL Server};'
+            'SERVER=DESKTOP-JQUK7UE;'
+            'DATABASE=UserDB1;'
+            'Trusted_Connection=yes;'
+        )
+    return pyodbc.connect(connection_string)
 
 otp_store = {}
 
 # ---------- NEW EMAIL VERIFICATION SENDER HELPER FUNCTION ----------
 def send_verification_email(to_email, name, verification_token):
     subject = "Please Verify Your Email Address"
-    verification_link = f"http://127.0.0.1:5000/verify-email/{verification_token}"
+    
+    # Use the APP_URL environment variable if available, otherwise use request host
+    base_url = APP_URL if APP_URL else request.host_url
+    verification_link = f"{base_url}verify-email/{verification_token}"
+
     body = f"""
-    Hi {name},
+Hi {name},
 
-    Thank you for registering! Please click the link below to verify your email address and activate your account:
+Thank you for registering! Please click the link below to verify your email address and activate your account:
 
-    {verification_link}
+{verification_link}
 
-    This link will expire in 1 hour.
+This link will expire in 1 hour.
 
-    Regards, 
-    Yuva Saathi Team
-    """
+Regards, 
+Yuva Saathi Team
+"""
 
     msg = MIMEMultipart()
     msg["From"] = SENDER_EMAIL
@@ -79,7 +108,7 @@ def send_verification_email(to_email, name, verification_token):
 
 # Register a user
 def register_user(first, middle, surname, email, mobile, aadhaar, pan, password,
-                  education, location, history, certifications, prev_exchange):
+                 education, location, history, certifications, prev_exchange):
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -91,8 +120,6 @@ def register_user(first, middle, surname, email, mobile, aadhaar, pan, password,
         # NEW: Generate a verification token
         verification_token = s.dumps(email, salt='email-confirm')
 
-        # NEW: Add a 'Verified' column to your table, defaulting to 0 or False.
-        # This part of the code assumes your database schema has been updated.
         cursor.execute("""
             INSERT INTO dbo.Users1
             (First_Name, Middle_Name, Surname, Email, Mobile_No, Aadhaar_Number, PAN_Number, 
@@ -136,21 +163,6 @@ def login_user_with_password(email, password):
         return {"error": "An error occurred."}, None
     finally:
         conn.close()
-
-# Flask App setup
-app = Flask(__name__)
-CORS(app)
-
-# Configure the upload folder for resumes
-UPLOAD_FOLDER = "uploads"
-GENERATED_FOLDER = "generated_resumes"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(GENERATED_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['GENERATED_FOLDER'] = GENERATED_FOLDER
-
-# Register the map_api blueprint to make its routes available
-app.register_blueprint(map_bp)
 
 # Registration endpoint
 @app.route('/register', methods=['POST'])
@@ -196,8 +208,9 @@ def verify_email_endpoint(token):
             conn.commit()
             print(f"✅ Email verified successfully for: {email}")
             
-            # Redirect the user to the login page with a success message
-            return redirect("http://127.0.0.1:3000/login?verified=true")
+            # Use a dynamic URL for the frontend redirect
+            frontend_url = APP_URL if APP_URL else "http://localhost:3000"
+            return redirect(f"{frontend_url}/login?verified=true")
             
         except Exception as e:
             conn.rollback()
@@ -223,6 +236,9 @@ def generate_otp_endpoint():
     data = request.json
     email = data.get('email')
     
+    if not email:
+        return jsonify({"error": "Email is required."}), 400
+
     conn = get_connection()
     cursor = conn.cursor()
     try:
