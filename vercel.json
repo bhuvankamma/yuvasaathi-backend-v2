@@ -1,7 +1,8 @@
 {
-  "files": [
-    "data/bihar_districts.geojson",
-    "data/bihar_blocks.geojson",
-    "data/bihar_villages.geojson"
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    }
   ]
 }
