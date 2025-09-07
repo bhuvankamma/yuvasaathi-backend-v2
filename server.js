@@ -5,10 +5,9 @@ const fs = require('fs');
 const app = express();
 const PORT = 5000;
 
-// Update this line to allow only your Vercel front-end URL
 const allowedOrigins = [
   'https://yuvasaathi-frontend.vercel.app', 
-  'http://localhost:3000' // Keep this for local development
+  'http://localhost:3000'
 ];
 
 const corsOptions = {
@@ -21,7 +20,7 @@ const corsOptions = {
   }
 };
 
-app.use(cors(corsOptions)); // Use the configured options
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // --- DATA LOADING (Happens once when the server starts) ---
@@ -41,7 +40,6 @@ try {
 
 // --- API ENDPOINTS ---
 
-// 1. Get all districts for the initial map view
 app.get('/api/bihar-map-data', (req, res) => {
     if (!districtsData) {
         return res.status(500).json({ error: "District map data not available." });
@@ -49,7 +47,6 @@ app.get('/api/bihar-map-data', (req, res) => {
     res.json(districtsData);
 });
 
-// 2. Get blocks for a specific district
 app.get('/api/district-data/:district_name', (req, res) => {
     const districtName = req.params.district_name.toLowerCase();
 
@@ -69,7 +66,6 @@ app.get('/api/district-data/:district_name', (req, res) => {
     });
 });
 
-// 3. Get villages for a specific mandal/block
 app.get('/api/mandal-data/:mandal_name', (req, res) => {
     const mandalName = req.params.mandal_name.toLowerCase();
 
@@ -89,7 +85,6 @@ app.get('/api/mandal-data/:mandal_name', (req, res) => {
     });
 });
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+// REMOVED app.listen() call.
+// EXPORT app for Vercel Serverless Function
+module.exports = app;
