@@ -15,6 +15,14 @@
       "destination": "/api/index.js"
     },
     {
+      "source": "/api/district-data/:district_name",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/api/mandal-data/:mandal_name",
+      "destination": "/api/index.js"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/app.py"
     }
@@ -40,7 +48,7 @@
           "value": "true"
         }
       ]
-      
     }
   ]
+  
 }

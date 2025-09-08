@@ -18,7 +18,6 @@ from map_api import map_bp
 
 # Flask App setup
 app = Flask(__name__)
-# CORS is correctly set up here, so no changes are needed for the CORS configuration itself.
 CORS(app)
 
 # Configure the upload folder for resumes
@@ -134,7 +133,7 @@ def login_user_with_password(email, password):
     finally:
         conn.close()
 
-@app.route('/register', methods=['POST'])
+@app.route('/api/register', methods=['POST'])
 def register_endpoint():
     data = request.json
     required_fields = ['First_Name', 'Surname', 'Email', 'Mobile_No', 'Aadhaar_Number', 'PAN_Number', 'Password', 'Education_Claiification', 'Current_location', 'Empolyment_history_Appraisals', 'Certifications', 'Have_You_previously_with_the_Employemnt_Exchange']
@@ -189,11 +188,6 @@ def verify_email_endpoint(token):
         print(f"❌ Unexpected error during email verification: {e}")
         return jsonify({"error": "An unexpected error occurred."}), 500
 
-#
-# ---- 💡 FIX: ADDED /api PREFIX TO ALL API ENDPOINTS ----
-#
-
-# Corrected Route for OTP generation
 @app.route('/api/generate-otp', methods=['POST'])
 def generate_otp_endpoint():
     data = request.json
@@ -225,7 +219,6 @@ def generate_otp_endpoint():
         print(f"❌ Error sending OTP email: {e}")
         return jsonify({"error": "Failed to send OTP email."}), 500
 
-# Corrected Route for Login
 @app.route('/api/login', methods=['POST'])
 def login_endpoint():
     data = request.json
@@ -260,7 +253,6 @@ def login_endpoint():
     else:
         return jsonify({"error": "Invalid OTP."}), 400
 
-# Corrected Route for Upload Resume
 @app.route("/api/upload_resume/<int:user_id>", methods=["POST"])
 def upload_resume(user_id):
     if "resume" not in request.files:
@@ -286,7 +278,6 @@ def upload_resume(user_id):
     else:
         return jsonify({"error": "Invalid file format"}), 400
 
-# Corrected Route for Generate Resume
 @app.route("/api/generate_resume/<int:user_id>", methods=["POST"])
 def generate_resume(user_id):
     data = request.json
@@ -352,7 +343,6 @@ def generate_resume(user_id):
             conn.close()
     return jsonify({"message": "Resume generated successfully!", "path": filepath}), 200
 
-# Corrected Route for Download Resume
 @app.route("/api/download_resume/<int:user_id>", methods=["GET"])
 def download_resume(user_id):
     conn = get_connection()
@@ -382,7 +372,6 @@ def download_resume(user_id):
         if 'conn' in locals() and conn:
             conn.close()
 
-# Corrected Route for Chat with Ollama
 @app.route('/api/chat', methods=['POST'])
 def chat_with_ollama():
     data = request.get_json()
@@ -401,20 +390,6 @@ def chat_with_ollama():
     except Exception as e:
         print(f"Error communicating with Ollama: {e}")
         return jsonify({'error': 'An error occurred while getting a response from the chatbot.'}), 500
-
-# Corrected Route for Bihar Map Data
-@app.route('/api/bihar-map-data')
-def get_bihar_map_data():
-    try:
-        file_path = os.path.join(app.root_path, 'bihar_districts_with_data.geojson')
-        if not os.path.exists(file_path):
-            return jsonify({"error": "Map data file not found."}), 404
-        with open(file_path, 'r', encoding='utf-8') as f:
-            map_data = f.read()
-        return map_data, 200, {'Content-Type': 'application/json'}
-    except Exception as e:
-        print(f"Error loading map data: {e}")
-        return jsonify({"error": "An error occurred while fetching map data."}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
