@@ -18,6 +18,7 @@ from map_api import map_bp
 
 # Flask App setup
 app = Flask(__name__)
+# CORS is correctly set up here, so no changes are needed for the CORS configuration itself.
 CORS(app)
 
 # Configure the upload folder for resumes
@@ -86,7 +87,7 @@ Yuva Saathi Team
         print(f"❌ Error sending verification email: {e}")
 
 def register_user(first, middle, surname, email, mobile, aadhaar, pan, password,
-                 education, location, history, certifications, prev_exchange):
+                  education, location, history, certifications, prev_exchange):
     conn = get_connection()
     cursor = conn.cursor()
     try:
@@ -188,7 +189,11 @@ def verify_email_endpoint(token):
         print(f"❌ Unexpected error during email verification: {e}")
         return jsonify({"error": "An unexpected error occurred."}), 500
 
-# CORRECTED: Use the /api prefix here to match your vercel.json rewrite rule
+#
+# ---- 💡 FIX: ADDED /api PREFIX TO ALL API ENDPOINTS ----
+#
+
+# Corrected Route for OTP generation
 @app.route('/api/generate-otp', methods=['POST'])
 def generate_otp_endpoint():
     data = request.json
@@ -220,7 +225,7 @@ def generate_otp_endpoint():
         print(f"❌ Error sending OTP email: {e}")
         return jsonify({"error": "Failed to send OTP email."}), 500
 
-# CORRECTED: Use the /api prefix here to match your vercel.json rewrite rule
+# Corrected Route for Login
 @app.route('/api/login', methods=['POST'])
 def login_endpoint():
     data = request.json
@@ -255,6 +260,7 @@ def login_endpoint():
     else:
         return jsonify({"error": "Invalid OTP."}), 400
 
+# Corrected Route for Upload Resume
 @app.route("/api/upload_resume/<int:user_id>", methods=["POST"])
 def upload_resume(user_id):
     if "resume" not in request.files:
@@ -280,6 +286,7 @@ def upload_resume(user_id):
     else:
         return jsonify({"error": "Invalid file format"}), 400
 
+# Corrected Route for Generate Resume
 @app.route("/api/generate_resume/<int:user_id>", methods=["POST"])
 def generate_resume(user_id):
     data = request.json
@@ -345,6 +352,7 @@ def generate_resume(user_id):
             conn.close()
     return jsonify({"message": "Resume generated successfully!", "path": filepath}), 200
 
+# Corrected Route for Download Resume
 @app.route("/api/download_resume/<int:user_id>", methods=["GET"])
 def download_resume(user_id):
     conn = get_connection()
@@ -374,6 +382,7 @@ def download_resume(user_id):
         if 'conn' in locals() and conn:
             conn.close()
 
+# Corrected Route for Chat with Ollama
 @app.route('/api/chat', methods=['POST'])
 def chat_with_ollama():
     data = request.get_json()
@@ -393,6 +402,7 @@ def chat_with_ollama():
         print(f"Error communicating with Ollama: {e}")
         return jsonify({'error': 'An error occurred while getting a response from the chatbot.'}), 500
 
+# Corrected Route for Bihar Map Data
 @app.route('/api/bihar-map-data')
 def get_bihar_map_data():
     try:
