@@ -23,6 +23,7 @@ from otp_service import generate_otp, send_otp_email
 
 # Flask App setup
 app = Flask(__name__)
+# THIS LINE IS CRITICAL: It enables CORS for all routes in the application.
 CORS(app)
 
 # Configure the upload folder for resumes
