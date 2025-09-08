@@ -470,5 +470,23 @@ def chat_with_ollama():
         print(f"Error communicating with Ollama: {e}")
         return jsonify({'error': 'An error occurred while getting a response from the chatbot.'}), 500
 
+# NEW: MAP API ENDPOINT ADDED DIRECTLY TO app.py
+@app.route('/api/bihar-map-data')
+def get_bihar_map_data():
+    try:
+        # Load the GeoJSON file. Vercel needs a relative path.
+        file_path = os.path.join(app.root_path, 'bihar_districts_with_data.geojson')
+        
+        if not os.path.exists(file_path):
+            return jsonify({"error": "Map data file not found."}), 404
+            
+        with open(file_path, 'r', encoding='utf-8') as f:
+            map_data = f.read()
+            
+        return map_data, 200, {'Content-Type': 'application/json'}
+    except Exception as e:
+        print(f"Error loading map data: {e}")
+        return jsonify({"error": "An error occurred while fetching map data."}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
