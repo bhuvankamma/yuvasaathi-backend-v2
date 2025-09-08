@@ -11,6 +11,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/bihar-map-data",
+      "destination": "/api/index.js"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/app.py"
     }
@@ -36,8 +40,7 @@
           "value": "true"
         }
       ]
+      
     }
   ]
-  
 }
-
