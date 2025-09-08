@@ -3,6 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/index.js"
+    },
+    {
+      "source": "/generate-otp",
+      "destination": "/api/index.js"
     }
   ],
   "headers": [
