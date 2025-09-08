@@ -86,7 +86,7 @@ Yuva Saathi Team
         print(f"❌ Error sending verification email: {e}")
 
 def register_user(first, middle, surname, email, mobile, aadhaar, pan, password,
-                  education, location, history, certifications, prev_exchange):
+                 education, location, history, certifications, prev_exchange):
     conn = get_connection()
     cursor = conn.cursor()
     try:
