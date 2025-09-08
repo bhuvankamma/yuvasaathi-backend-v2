@@ -1,0 +1,49 @@
+{
+  "Bihar": {
+    "districts": [
+      {
+        "id": "Patna",
+        "name": "Patna",
+        "skillData": {
+          "ITJobs": 1500,
+          "NonITJobs": 2500,
+          "TestResults": { "passed": 850, "failed": 150 }
+        },
+        "mandals": [
+          {
+            "id": "PatnaSadar",
+            "name": "Patna Sadar",
+            "skillData": {
+              "ITJobs": 500,
+              "NonITJobs": 800,
+              "TestResults": { "passed": 300, "failed": 50 }
+            }
+          },
+          {
+            "id": "Danapur",
+            "name": "Danapur",
+            "skillData": {
+              "ITJobs": 400,
+              "NonITJobs": 700,
+              "TestResults": { "passed": 250, "failed": 25 }
+            }
+          }
+         
+        ]
+      },
+      {
+        "id": "Gaya",
+        "name": "Gaya",
+        "skillData": {
+          "ITJobs": 800,
+          "NonITJobs": 1800,
+          "TestResults": { "passed": 500, "failed": 100 }
+        },
+        "mandals": [
+        
+        ]
+      }
+      
+    ]
+  }
+}
