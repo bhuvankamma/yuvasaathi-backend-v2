@@ -6,19 +6,19 @@ const path = require('path');
 const app = express();
 
 const allowedOrigins = [
-    'https://yuvasaathi-frontend.vercel.app',
-    'http://localhost:3000',
-    'https://www.yuvasaathi.in'
+    'https://yuvasaathi-frontend.vercel.app',
+    'http://localhost:3000',
+    'https://www.yuvasaathi.in'
 ];
 
 const corsOptions = {
-    origin: function (origin, callback) {
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    }
+    origin: function (origin, callback) {
+        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    }
 };
 
 app.use(cors(corsOptions));
@@ -28,71 +28,74 @@ app.use(express.json());
 
 // 1. Get all districts for the initial map view
 app.get('/api/bihar-map-data', (req, res) => {
-    try {
-        // Correct pathing for Vercel
-        const filePath = path.join(__dirname, 'data', 'bihar_districts.geojson');
-        const districtsData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        res.json(districtsData);
-    } catch (error) {
-        console.error("Error loading district map data:", error);
-        return res.status(500).json({ error: "District map data not available." });
-    }
+    try {
+        // CORRECTED PATH: Goes up one directory from 'api' to the root
+        const filePath = path.join(__dirname, '..', 'data', 'bihar_districts.geojson');
+        const districtsData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        res.json(districtsData);
+    } catch (error) {
+        console.error("Error loading district map data:", error);
+        // More descriptive error for debugging
+        return res.status(500).json({ error: "District map data not available.", details: error.message });
+    }
 });
 
 // 2. Get blocks for a specific district
 app.get('/api/district-data/:district_name', (req, res) => {
-    try {
-        // Correct pathing for Vercel
-        const filePath = path.join(__dirname, 'data', 'bihar_blocks.geojson');
-        const blocksData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        const districtName = req.params.district_name.toLowerCase();
+    try {
+        // CORRECTED PATH: Goes up one directory from 'api' to the root
+        const filePath = path.join(__dirname, '..', 'data', 'bihar_blocks.geojson');
+        const blocksData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const districtName = req.params.district_name.toLowerCase();
 
-        const districtBlocks = {
-            ...blocksData,
-            features: blocksData.features.filter(feature =>
-                feature.properties.district_name.toLowerCase() === districtName
-            )
-        };
+        const districtBlocks = {
+            ...blocksData,
+            features: blocksData.features.filter(feature =>
+                feature.properties.district_name.toLowerCase() === districtName
+            )
+        };
 
-        if (districtBlocks.features.length === 0) {
-            return res.status(404).json({ error: "No blocks found for this district." });
-        }
+        if (districtBlocks.features.length === 0) {
+            return res.status(404).json({ error: "No blocks found for this district." });
+        }
 
-        res.json({
-            map_geojson: districtBlocks
-        });
-    } catch (error) {
-        console.error("Error loading blocks data:", error);
-        return res.status(500).json({ error: "Blocks map data not available." });
-    }
+        res.json({
+            map_geojson: districtBlocks
+        });
+    } catch (error) {
+        console.error("Error loading blocks data:", error);
+        // More descriptive error for debugging
+        return res.status(500).json({ error: "Blocks map data not available.", details: error.message });
+    }
 });
 
 // 3. Get villages for a specific mandal/block
 app.get('/api/mandal-data/:mandal_name', (req, res) => {
-    try {
-        // Correct pathing for Vercel
-        const filePath = path.join(__dirname, 'data', 'bihar_villages.geojson');
-        const villagesData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-        const mandalName = req.params.mandal_name.toLowerCase();
+    try {
+        // CORRECTED PATH: Goes up one directory from 'api' to the root
+        const filePath = path.join(__dirname, '..', 'data', 'bihar_villages.geojson');
+        const villagesData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const mandalName = req.params.mandal_name.toLowerCase();
 
-        const mandalVillages = {
-            ...villagesData,
-            features: villagesData.features.filter(feature =>
-                feature.properties.mandal_name.toLowerCase() === mandalName
-            )
-        };
+        const mandalVillages = {
+            ...villagesData,
+            features: villagesData.features.filter(feature =>
+                feature.properties.mandal_name.toLowerCase() === mandalName
+            )
+        };
 
-        if (mandalVillages.features.length === 0) {
-            return res.status(404).json({ error: "No villages found for this mandal." });
-        }
+        if (mandalVillages.features.length === 0) {
+            return res.status(404).json({ error: "No villages found for this mandal." });
+        }
 
-        res.json({
-            map_geojson: mandalVillages
-        });
-    } catch (error) {
-        console.error("Error loading villages data:", error);
-        return res.status(500).json({ error: "Villages map data not available." });
-    }
+        res.json({
+            map_geojson: mandalVillages
+        });
+    } catch (error) {
+        console.error("Error loading villages data:", error);
+        // More descriptive error for debugging
+        return res.status(500).json({ error: "Villages map data not available.", details: error.message });
+    }
 });
 
 // Export app for Vercel Serverless Function
