@@ -11,7 +11,7 @@
   ],
   "rewrites": [
     {
-      "source": "/api/maps/(.*)",
+      "source": "/api/bihar-map-data",
       "destination": "/api/index.js"
     },
     {
