@@ -1,12 +1,26 @@
 {
+  "builds": [
+    {
+      "src": "api/app.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "api/index.js",
+      "use": "@vercel/node"
+    }
+  ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/maps/(.*)",
       "destination": "/api/index.js"
     },
     {
+      "source": "/api/(.*)",
+      "destination": "/api/app.py"
+    },
+    {
       "source": "/generate-otp",
-      "destination": "/api/index.js"
+      "destination": "/api/app.py"
     }
   ],
   "headers": [
