@@ -3,8 +3,6 @@ import hashlib
 import random
 import time
 from flask import Flask, request, jsonify, send_file, redirect
-# NOTE: The flask_cors library has been removed to prevent conflicts with Vercel's CORS configuration.
-# from flask_cors import CORS
 import ollama
 import os
 from reportlab.lib.pagesizes import letter
@@ -19,8 +17,27 @@ from map_api import map_bp
 
 # Flask App setup
 app = Flask(__name__)
-# NOTE: The CORS(app) line has been removed. Vercel will now handle all CORS headers.
-# CORS(app)
+# NOTE: The CORS(app) line has been removed.
+
+# Add a before_request handler to manually set CORS headers for preflight OPTIONS requests
+@app.before_request
+def handle_preflight():
+    if request.method == "OPTIONS":
+        response = jsonify({'message': 'Preflight request handled'})
+        response.headers.add("Access-Control-Allow-Origin", "https://www.yuvasaathi.in")
+        response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, Access-Control-Allow-Origin, Access-Control-Allow-Credentials")
+        response.headers.add("Access-Control-Allow-Credentials", "true")
+        return response
+
+# Add an after_request handler to set CORS headers on all responses
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add("Access-Control-Allow-Origin", "https://www.yuvasaathi.in")
+    response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, Access-Control-Allow-Origin, Access-Control-Allow-Credentials")
+    response.headers.add("Access-Control-Allow-Credentials", "true")
+    return response
 
 # Configure the upload folder for resumes
 UPLOAD_FOLDER = "uploads"
