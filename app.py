@@ -3,7 +3,8 @@ import hashlib
 import random
 import time
 from flask import Flask, request, jsonify, send_file, redirect
-from flask_cors import CORS
+# NOTE: The flask_cors library has been removed to prevent conflicts with Vercel's CORS configuration.
+# from flask_cors import CORS
 import ollama
 import os
 from reportlab.lib.pagesizes import letter
@@ -18,7 +19,8 @@ from map_api import map_bp
 
 # Flask App setup
 app = Flask(__name__)
-CORS(app)
+# NOTE: The CORS(app) line has been removed. Vercel will now handle all CORS headers.
+# CORS(app)
 
 # Configure the upload folder for resumes
 UPLOAD_FOLDER = "uploads"
