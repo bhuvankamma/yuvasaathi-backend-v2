@@ -2,7 +2,7 @@ import pyodbc
 import hashlib
 import random
 import time
-from flask import Flask, request, jsonify, send_file, redirect
+from flask import Flask, request, jsonify, send_file, redirect, make_response
 import ollama
 import os
 from reportlab.lib.pagesizes import letter
@@ -23,20 +23,22 @@ app = Flask(__name__)
 @app.before_request
 def handle_preflight():
     if request.method == "OPTIONS":
-        response = jsonify({'message': 'Preflight request handled'})
-        response.headers.add("Access-Control-Allow-Origin", "https://www.yuvasaathi.in")
-        response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-        response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, Access-Control-Allow-Origin, Access-Control-Allow-Credentials")
-        response.headers.add("Access-Control-Allow-Credentials", "true")
+        response = make_response()
+        response.status_code = 200
+        response.headers["Access-Control-Allow-Origin"] = "https://www.yuvasaathi.in"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Content-Length"] = "0"
         return response
 
 # Add an after_request handler to set CORS headers on all responses
 @app.after_request
 def add_cors_headers(response):
-    response.headers.add("Access-Control-Allow-Origin", "https://www.yuvasaathi.in")
-    response.headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization, Access-Control-Allow-Origin, Access-Control-Allow-Credentials")
-    response.headers.add("Access-Control-Allow-Credentials", "true")
+    response.headers["Access-Control-Allow-Origin"] = "https://www.yuvasaathi.in"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
 # Configure the upload folder for resumes
@@ -64,7 +66,7 @@ def get_connection():
         return pyodbc.connect(
             'DRIVER={SQL Server};'
             'SERVER=DESKTOP-JQUK7UE;'
-            'DATABASE=UserDB1;'
+            'DATABASE=User DB1;'
             'Trusted_Connection=yes;'
         )
     return pyodbc.connect(connection_string)
@@ -125,7 +127,7 @@ def register_user(first, middle, surname, email, mobile, aadhaar, pan, password,
               hashed_pwd, hashed_pwd, education, location, history, certifications, prev_exchange))
         conn.commit()
         send_verification_email(email, first, verification_token)
-        return "User registered successfully! A verification link has been sent to your email.", True
+        return "User  registered successfully! A verification link has been sent to your email.", True
     except Exception as e:
         return f"Error: {e}", False
     finally:
@@ -143,7 +145,7 @@ def login_user_with_password(email, password):
             return {"error": "Please verify your email address to log in."}, None
         hashed_pwd = hash_password(password)
         if user.Password == hashed_pwd:
-            return {"message": "Login successful!", "user": {"UserID": user.UserID, "First_Name": user.First_Name, "Surname": user.Surname, "Email": user.Email}}, True
+            return {"message": "Login successful!", "user": {"User ID": user.UserID, "First_Name": user.First_Name, "Surname": user.Surname, "Email": user.Email}}, True
         else:
             return {"error": "Invalid password."}, None
     except Exception as e:
@@ -259,12 +261,12 @@ def login_endpoint():
             cursor.execute("SELECT UserID, First_Name, Surname, Email, Verified FROM dbo.Users1 WHERE Email=?", (email,))
             user = cursor.fetchone()
             if user and user.Verified:
-                user_data = {"UserID": user.UserID, "First_Name": user.First_Name, "Surname": user.Surname, "Email": user.Email}
+                user_data = {"User ID": user.UserID, "First_Name": user.First_Name, "Surname": user.Surname, "Email": user.Email}
                 return jsonify({"message": "Login successful!", "user": user_data}), 200
             elif user and not user.Verified:
                 return jsonify({"error": "Please verify your email before logging in."}), 403
             else:
-                return jsonify({"error": "User not found."}), 404
+                return jsonify({"error": "User  not found."}), 404
         except Exception as e:
             return jsonify({"error": f"Database error: {e}"}), 500
         finally:
