@@ -9,22 +9,27 @@
       "use": "@vercel/node"
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/bihar-map-data",
-      "destination": "/api/index.js"
+      "src": "/api/(.*)",
+      "methods": ["OPTIONS"],
+      "dest": "app.py"
     },
     {
-      "source": "/api/district-data/:district_name",
-      "destination": "/api/index.js"
+      "src": "/api/bihar-map-data",
+      "dest": "api/index.js"
     },
     {
-      "source": "/api/mandal-data/:mandal_name",
-      "destination": "/api/index.js"
+      "src": "/api/district-data/:district_name",
+      "dest": "api/index.js"
     },
     {
-      "source": "/api/(.*)",
-      "destination": "/app.py"
+      "src": "/api/mandal-data/:mandal_name",
+      "dest": "api/index.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "app.py"
     }
   ],
   "headers": [
